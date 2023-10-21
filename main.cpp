@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -15,7 +16,19 @@ double evaluatePolynomial(const vector<Term>& polynomial, double x) {
     }
     return result;
 }
-
+void simplify(vector<Term>& polynomial) {
+    for (int i = 0; i < polynomial.size(); i++) {
+        for (int j = i + 1; j < polynomial.size(); j++) {
+            if (polynomial[i].exponent == polynomial[j].exponent) {
+                polynomial[i].coefficient += polynomial[j].coefficient;
+                polynomial.erase(polynomial.begin() + j);
+                j--;
+            }
+        }
+    }
+    polynomial.erase(remove_if(polynomial.begin(), polynomial.end(), [](const Term& term) {return term.coefficient == 0; }), polynomial.end());
+    sort(polynomial.begin(), polynomial.end(), [](const Term& a, const Term& b) {return a.exponent > b.exponent; });
+}
 int main() {
     setlocale(LC_ALL, "Russian");
     vector<Term> polynomial;
@@ -34,7 +47,7 @@ int main() {
         }
         polynomial.push_back(term);
     }
-
+    simplify(polynomial);
     cout << "Полином: ";
     for (int i = 0; i < polynomial.size(); ++i) {
         if (polynomial[i].coefficient >= 0 && i != 0) {
